@@ -2,7 +2,7 @@
 
 This frontend is a Create React App project customized via CRACO.
 
-This repository is standardized on npm for dependency installation and build verification. Do not use yarn in CI or local verification workflows, because yarn may fail on Node 18 due to dependency `engines` constraints (for example, `react-router-dom@7` can declare `node >= 20`).
+This repository is standardized on npm for dependency installation and build verification. Yarn is not supported because it enforces Node engine checks more strictly for `react-router-dom@7.x`; this project currently runs under Node 18, so Yarn can fail installs based on `engines` constraints. Use npm (`npm ci`) for deterministic installs from `package-lock.json`.
 
 ## Quick start (npm-first)
 
