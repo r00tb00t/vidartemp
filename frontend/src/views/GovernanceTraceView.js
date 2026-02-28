@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertTriangle, RefreshCw, Shield } from "lucide-react";
 import api from "../api/client";
 
@@ -17,7 +17,7 @@ export default function GovernanceTraceView() {
 
   const endpoint = useMemo(() => "/governance/trace", []);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -30,12 +30,11 @@ export default function GovernanceTraceView() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [endpoint]);
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [load]);
 
   return (
     <div className="p-6 max-w-6xl">
