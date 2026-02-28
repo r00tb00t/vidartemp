@@ -6,3 +6,17 @@ frontend/build/
 
 # Existing
 .file_activity_report.json
+
+# Internal knowledge database
+.knowledge/
+
+# Snapshot files
+*.current
+
+# Internal audit artifacts
+GIT_*.txt
+*_AUDIT*.txt
+*_INTERNAL*.txt
+
+# Local environment files
+.env
