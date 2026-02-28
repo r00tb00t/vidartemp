@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { RefreshCw, AlertTriangle, ShieldAlert, CheckCircle2, XCircle } from "lucide-react";
+import { RefreshCw, AlertTriangle } from "lucide-react";
 import api from "../api/client";
 
 function MetricCard({ label, value, sub, accent }) {

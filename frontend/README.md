@@ -1,70 +1,67 @@
-# Getting Started with Create React App
+# Frontend (CRA + CRACO) - npm install/build verification
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This frontend is a Create React App project customized via CRACO.
 
-## Available Scripts
+This repository is standardized on npm for dependency installation and build verification. Yarn is not supported because it enforces Node engine checks more strictly for `react-router-dom@7.x`; this project currently runs under Node 18, so Yarn can fail installs based on `engines` constraints. Use npm (`npm ci`) for deterministic installs from `package-lock.json`.
 
-In the project directory, you can run:
+## Quick start (npm-first)
+
+Run these commands from `vidartemp-241505/frontend`:
+
+```bash
+# Install exactly what's in package-lock.json
+npm ci
+
+# Dev server
+npm start
+```
+
+## Build verification (CI-safe)
+
+Use a non-interactive build command in CI:
+
+```bash
+npm ci
+CI=true npm run build
+```
+
+This ensures a deterministic install from `package-lock.json` and avoids interactive prompts during the build.
+
+## Environment variables
+
+The container `.env` defines the following variables, which may be required for a fully functional runtime depending on which view you exercise:
+
+- `REACT_APP_API_BASE`
+- `REACT_APP_BACKEND_URL`
+- `REACT_APP_FRONTEND_URL`
+- `REACT_APP_WS_URL`
+- `REACT_APP_NODE_ENV`
+- `REACT_APP_NEXT_TELEMETRY_DISABLED`
+- `REACT_APP_ENABLE_SOURCE_MAPS`
+- `REACT_APP_PORT`
+
+When running locally, ensure these are set via `.env` (or your shell) before `npm start` / `npm run build`.
+
+## Available scripts
 
 ### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Runs the app in development mode via CRACO. Open http://localhost:3000 to view it in your browser.
 
 ### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Launches the test runner (CRACO wrapper around CRA test).
 
 ### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Builds the app for production to the `build` folder.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Notes on package managers
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+This project includes a `package-lock.json` and uses `npm ci` for deterministic installs.
 
-### `npm run eject`
+Avoid running `yarn install` or `yarn install --frozen-lockfile` for verification, because it can enforce stricter Node engine checks than npm and fail under Node 18.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Learn more
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+You can learn more in the Create React App documentation: https://facebook.github.io/create-react-app/docs/getting-started

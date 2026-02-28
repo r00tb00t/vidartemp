@@ -535,7 +535,9 @@ export default function AmendmentConsole() {
     }
   }, [page, stateFilter]);
 
-  useEffect(() => { load(page, stateFilter); }, [page, stateFilter]); // eslint-disable-line
+  useEffect(() => {
+    load(page, stateFilter);
+  }, [load, page, stateFilter]);
 
   const handleFilter = (sf) => { setStateFilter(sf); setPage(1); setSelected(null); };
   const handlePage   = (pg) => { setPage(pg); setSelected(null); };
