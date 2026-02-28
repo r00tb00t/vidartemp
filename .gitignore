@@ -1,1 +1,8 @@
+# Ignore local/CI artifacts
+node_modules/
+build/
+frontend/node_modules/
+frontend/build/
+
+# Existing
 .file_activity_report.json
