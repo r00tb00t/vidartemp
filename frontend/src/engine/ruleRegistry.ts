@@ -1,14 +1,16 @@
-// Deterministic, metadata-only rule registry.
-//
-// IMPORTANT:
-// - This file intentionally contains no evaluation logic and must not change engine semantics.
-// - Deterministic only: stable literals (no Date.now, Math.random, etc.).
-// - No runtime mutation: the registry object is frozen after declaration.
+/*
+ * Deterministic, metadata-only rule registry.
+ *
+ * IMPORTANT:
+ * - This file intentionally contains NO evaluation logic and must not change engine semantics.
+ * - Deterministic only: stable literals (no Date.now(), Math.random(), etc.).
+ * - No runtime mutation: exports are frozen / readonly and must not be mutated by callers.
+ */
 
-// The severity level associated with a rule (metadata-only).
+/** The severity level associated with a rule (metadata-only). */
 export type RuleSeverity = "CRITICAL" | "WARNING" | "INFORMATIONAL";
 
-// Optional coarse category used for grouping in UI/Docs (metadata-only).
+/** Optional coarse category used for grouping in UI/Docs (metadata-only). */
 export type RuleCategory =
   | "SOVEREIGNTY"
   | "ZERO_CLOUD"
@@ -18,14 +20,16 @@ export type RuleCategory =
   | "COMPLIANCE"
   | "OTHER";
 
-// Rule registry entry (metadata-only).
-//
-// Required fields (per specification):
-// - ruleCode
-// - domain
-// - description
-// - documentReference
-// - introducedInPolicyVersion
+/*
+ * Rule registry entry (metadata-only).
+ *
+ * Required fields (per specification):
+ * - ruleCode
+ * - domain
+ * - description
+ * - documentReference
+ * - introducedInPolicyVersion
+ */
 export type RuleRegistryEntry = {
   readonly ruleCode: string;
   readonly domain: string;
@@ -34,66 +38,76 @@ export type RuleRegistryEntry = {
   readonly introducedInPolicyVersion: string;
 };
 
-// Backwards-compatible alias for "metadata".
-// (This file is metadata-only; naming here must not affect evaluation semantics.)
+/* Backwards-compatible alias for "metadata". */
 export type RuleMetadata = RuleRegistryEntry;
 
-// Canonical registry map (keyed by ruleCode).
-//
-// NOTE: This is an explicit structural readonly type (no Record/Readonly usage).
-export type RuleRegistryMap = {
-  readonly [ruleCode: string]: RuleRegistryEntry;
-};
+/*
+ * Canonical registry map (keyed by ruleCode).
+ *
+ * Using `Readonly<Record<...>>` ensures:
+ * - callers cannot mutate the map through the type system
+ * - registry keys are strings
+ * - each value must structurally match RuleRegistryEntry
+ */
+export type RuleRegistryMap = Readonly<Record<string, RuleRegistryEntry>>;
 
-// The canonical registry map (keyed by ruleCode).
-//
-// Determinism rules:
-// - Keep as a literal object.
-// - Keep ordering stable (append new keys; do not reorder without intent).
-// - Do not compute fields dynamically.
-const RULE_REGISTRY_INTERNAL: { [ruleCode: string]: RuleRegistryEntry } = {
-  // NOTE: The authoritative rule list/metadata should be populated here.
-  // This registry is intentionally empty to avoid guessing rule codes or semantics.
-};
+/*
+ * The canonical registry map (keyed by ruleCode).
+ *
+ * Determinism rules:
+ * - Keep as a literal object.
+ * - Keep ordering stable (append new keys; do not reorder without intent).
+ * - Do not compute fields dynamically.
+ *
+ * NOTE: This registry is intentionally empty in this template to avoid guessing rule codes
+ * or semantics. Populate with authoritative rule metadata only.
+ */
+const RULE_REGISTRY_INTERNAL = {} as const satisfies RuleRegistryMap;
 
-// Frozen, readonly registry (metadata-only, deterministic semantics).
-//
-// We annotate with our own structural readonly type to avoid utility generic types.
-export const RULE_REGISTRY: RuleRegistryMap = Object.freeze(RULE_REGISTRY_INTERNAL);
+/*
+ * Frozen, readonly registry (metadata-only, deterministic semantics).
+ *
+ * We freeze at runtime to defend against accidental mutation in JS consumers.
+ * The explicit cast preserves the index-signature type for lookup usage.
+ */
+export const RULE_REGISTRY: RuleRegistryMap = Object.freeze(
+  RULE_REGISTRY_INTERNAL as RuleRegistryMap,
+);
 
-// Deterministic lookup map for rule metadata by code.
-//
-// This separate export preserves prior public surface area and calling patterns.
+/*
+ * Deterministic lookup map for rule metadata by code.
+ *
+ * This separate export preserves prior public surface area and calling patterns.
+ */
 export const RULE_REGISTRY_BY_CODE: RuleRegistryMap = RULE_REGISTRY;
 
-// Deterministic readonly list view of the registry entries.
-//
-// We build the list without using Object.values (to avoid needing type assertions
-// under strict TypeScript). The resulting array is frozen to prevent mutation.
-const RULE_REGISTRY_LIST: readonly RuleRegistryEntry[] = (function buildFrozenList() {
-  const list: RuleRegistryEntry[] = [];
+/*
+ * Deterministic readonly list view of the registry entries.
+ *
+ * We compute it once and freeze it so callers cannot mutate the returned array.
+ * Object.values preserves insertion order of string keys in modern JS engines.
+ */
+const RULE_REGISTRY_LIST = Object.freeze(
+  Object.values(RULE_REGISTRY_BY_CODE),
+) as readonly RuleRegistryEntry[];
 
-  // Use a for-in to preserve deterministic enumeration order of string keys.
-  // (Insertion order for string keys is stable in modern JS engines.)
-  for (const ruleCode in RULE_REGISTRY_BY_CODE) {
-    if (Object.prototype.hasOwnProperty.call(RULE_REGISTRY_BY_CODE, ruleCode)) {
-      list.push(RULE_REGISTRY_BY_CODE[ruleCode]);
-    }
-  }
-
-  return Object.freeze(list);
-})();
-
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * Get metadata for a given rule code, if it exists in the registry.
+ *
+ * @param ruleCode - The rule code to look up.
+ * @returns The associated rule metadata if present; otherwise undefined.
+ */
 export function getRuleMetadata(ruleCode: string): RuleMetadata | undefined {
-  // Return the metadata for a given rule code, if it exists in the registry.
-  // This function is metadata-only and has no side effects.
   return RULE_REGISTRY_BY_CODE[ruleCode];
 }
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * List all registered rule metadata entries as a readonly array.
+ *
+ * @returns A frozen readonly array of all rule metadata entries.
+ */
 export function listRuleMetadata(): readonly RuleMetadata[] {
-  // Return the full rule registry list (readonly).
-  // Callers must not mutate returned data.
   return RULE_REGISTRY_LIST;
 }
