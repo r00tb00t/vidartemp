@@ -70,11 +70,22 @@ const webpackConfig = {
   },
 };
 
+/**
+ * Ensure Babel can parse TypeScript syntax that may exist in .js files.
+ *
+ * This project includes some files that intentionally contain TS-only constructs
+ * (e.g., `export type`, `satisfies`, type annotations) but are shipped through
+ * the CRA/CRACO Babel pipeline. Adding the TypeScript preset allows parsing
+ * and type-stripping during transpilation.
+ */
+webpackConfig.babel = {
+  presets: [require.resolve("@babel/preset-typescript")],
+  plugins: [],
+};
+
 // Only add babel metadata plugin during dev server
 if (config.enableVisualEdits && babelMetadataPlugin) {
-  webpackConfig.babel = {
-    plugins: [babelMetadataPlugin],
-  };
+  webpackConfig.babel.plugins.push(babelMetadataPlugin);
 }
 
 webpackConfig.devServer = (devServerConfig) => {
