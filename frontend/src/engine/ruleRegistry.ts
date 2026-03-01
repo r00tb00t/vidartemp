@@ -2,7 +2,7 @@
  * Deterministic, metadata-only rule registry.
  *
  * IMPORTANT:
- * - This file intentionally contains *no* evaluation logic and must not change engine semantics.
+ * - This file intentionally contains no evaluation logic and must not change engine semantics.
  * - Deterministic only: stable literals (no Date.now, Math.random, etc.).
  * - No runtime mutation: the registry object is frozen after declaration.
  */
@@ -30,13 +30,13 @@ export type RuleCategory =
  * - documentReference
  * - introducedInPolicyVersion
  */
-export type RuleRegistryEntry = Readonly<{
-  ruleCode: string;
-  domain: string;
-  description: string;
-  documentReference: string;
-  introducedInPolicyVersion: string;
-}>;
+export type RuleRegistryEntry = {
+  readonly ruleCode: string;
+  readonly domain: string;
+  readonly description: string;
+  readonly documentReference: string;
+  readonly introducedInPolicyVersion: string;
+};
 
 /**
  * Backwards-compatible alias for "metadata".
@@ -45,44 +45,60 @@ export type RuleRegistryEntry = Readonly<{
 export type RuleMetadata = RuleRegistryEntry;
 
 /**
+ * Canonical registry map (keyed by ruleCode).
+ *
+ * NOTE: This is an explicit structural readonly type (no Record/Readonly usage).
+ */
+export type RuleRegistryMap = {
+  readonly [ruleCode: string]: RuleRegistryEntry;
+};
+
+/**
  * The canonical registry map (keyed by ruleCode).
  *
  * Determinism rules:
  * - Keep as a literal object.
  * - Keep ordering stable (append new keys; do not reorder without intent).
  * - Do not compute fields dynamically.
- *
- * NOTE:
- * The declaration below MUST remain in the exact form (no `satisfies`):
- * `export const RULE_REGISTRY: Readonly<Record<string, RuleRegistryEntry>> = { ... } as Record<string, RuleRegistryEntry>;`
  */
-export const RULE_REGISTRY: Readonly<Record<string, RuleRegistryEntry>> =
-  {
-    // NOTE: The authoritative rule list/metadata should be populated here.
-    // This registry is intentionally empty to avoid guessing rule codes or semantics.
-  } as Record<string, RuleRegistryEntry>;
+const RULE_REGISTRY_INTERNAL: { [ruleCode: string]: RuleRegistryEntry } = {
+  // NOTE: The authoritative rule list/metadata should be populated here.
+  // This registry is intentionally empty to avoid guessing rule codes or semantics.
+};
 
-// Freeze to prevent runtime mutation (metadata-only, deterministic semantics).
-Object.freeze(RULE_REGISTRY);
+/**
+ * Frozen, readonly registry (metadata-only, deterministic semantics).
+ *
+ * We annotate with our own structural readonly type to avoid utility generic types.
+ */
+export const RULE_REGISTRY: RuleRegistryMap = Object.freeze(RULE_REGISTRY_INTERNAL);
 
 /**
  * Deterministic lookup map for rule metadata by code.
  *
- * We intentionally widen the type to a string-indexed map for safe indexing via
- * `map[ruleCode]` under strict TypeScript.
+ * This separate export preserves prior public surface area and calling patterns.
  */
-export const RULE_REGISTRY_BY_CODE: Readonly<Record<string, RuleRegistryEntry>> =
-  RULE_REGISTRY;
+export const RULE_REGISTRY_BY_CODE: RuleRegistryMap = RULE_REGISTRY;
 
 /**
  * Deterministic readonly list view of the registry entries.
  *
- * We freeze the resulting array to prevent accidental mutation by callers.
- * `Object.values` typing can be broad under strict TS, so we cast explicitly.
+ * We build the list without using Object.values (to avoid needing type assertions
+ * under strict TypeScript). The resulting array is frozen to prevent mutation.
  */
-const RULE_REGISTRY_LIST: readonly RuleRegistryEntry[] = Object.freeze(
-  Object.values(RULE_REGISTRY_BY_CODE) as RuleRegistryEntry[]
-);
+const RULE_REGISTRY_LIST: readonly RuleRegistryEntry[] = (function buildFrozenList() {
+  const list: RuleRegistryEntry[] = [];
+
+  // Use a for-in to preserve deterministic enumeration order of string keys.
+  // (Insertion order for string keys is stable in modern JS engines.)
+  for (const ruleCode in RULE_REGISTRY_BY_CODE) {
+    if (Object.prototype.hasOwnProperty.call(RULE_REGISTRY_BY_CODE, ruleCode)) {
+      list.push(RULE_REGISTRY_BY_CODE[ruleCode]);
+    }
+  }
+
+  return Object.freeze(list);
+})();
 
 // PUBLIC_INTERFACE
 export function getRuleMetadata(ruleCode: string): RuleMetadata | undefined {
