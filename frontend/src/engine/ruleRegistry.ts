@@ -62,7 +62,47 @@ export type RuleRegistryMap = Readonly<Record<string, RuleRegistryEntry>>;
  * NOTE: This registry is intentionally empty in this template to avoid guessing rule codes
  * or semantics. Populate with authoritative rule metadata only.
  */
-const RULE_REGISTRY_INTERNAL = {} as const satisfies RuleRegistryMap;
+const RULE_REGISTRY_INTERNAL = {
+  /**
+   * SOVR-* rules: sovereignty advisory metadata (no evaluation logic).
+   */
+  "SOVR-001": {
+    ruleCode: "SOVR-001",
+    domain: "sovereignty",
+    description: "Sovereignty advisory rule (metadata-only).",
+    documentReference: "Sovereignty Advisory Policy",
+    introducedInPolicyVersion: "1.0.0",
+  },
+  "SOVR-002": {
+    ruleCode: "SOVR-002",
+    domain: "sovereignty",
+    description: "Sovereignty advisory rule (metadata-only).",
+    documentReference: "Sovereignty Advisory Policy",
+    introducedInPolicyVersion: "1.0.0",
+  },
+
+  /**
+   * ZC-* rules: zero-cloud advisory metadata (no evaluation logic).
+   */
+  "ZC-001": {
+    ruleCode: "ZC-001",
+    domain: "zero-cloud",
+    description: "Zero-cloud advisory rule (metadata-only).",
+    documentReference: "Zero-Cloud Policy",
+    introducedInPolicyVersion: "1.0.0",
+  },
+
+  /**
+   * PROD-* rules: product advisory metadata (no evaluation logic).
+   */
+  "PROD-001": {
+    ruleCode: "PROD-001",
+    domain: "product",
+    description: "Product advisory rule (metadata-only).",
+    documentReference: "Product Advisory Policy",
+    introducedInPolicyVersion: "1.0.0",
+  },
+} as const satisfies RuleRegistryMap;
 
 /*
  * Frozen, readonly registry (metadata-only, deterministic semantics).
