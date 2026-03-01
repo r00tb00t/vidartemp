@@ -53,13 +53,14 @@ export type RuleMetadata = RuleRegistryEntry;
  * - Do not compute fields dynamically.
  *
  * NOTE:
- * The declaration below MUST remain in the exact form:
- * `} as const satisfies Readonly<Record<string, RuleRegistryEntry>>;`
+ * The declaration below MUST remain in the exact form (no `satisfies`):
+ * `export const RULE_REGISTRY: Readonly<Record<string, RuleRegistryEntry>> = { ... } as Record<string, RuleRegistryEntry>;`
  */
-export const RULE_REGISTRY = {
-  // NOTE: The authoritative rule list/metadata should be populated here.
-  // This registry is intentionally empty to avoid guessing rule codes or semantics.
-} as const satisfies Readonly<Record<string, RuleRegistryEntry>>;
+export const RULE_REGISTRY: Readonly<Record<string, RuleRegistryEntry>> =
+  {
+    // NOTE: The authoritative rule list/metadata should be populated here.
+    // This registry is intentionally empty to avoid guessing rule codes or semantics.
+  } as Record<string, RuleRegistryEntry>;
 
 // Freeze to prevent runtime mutation (metadata-only, deterministic semantics).
 Object.freeze(RULE_REGISTRY);
