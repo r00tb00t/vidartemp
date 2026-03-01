@@ -16,20 +16,7 @@
  */
 export const POLICY_VERSION = "1.0.0";
 
-/** The severity level associated with a rule (metadata-only). */
-export type RuleSeverity = "CRITICAL" | "WARNING" | "INFORMATIONAL";
-
-/** Optional coarse category used for grouping in UI/Docs (metadata-only). */
-export type RuleCategory =
-  | "SOVEREIGNTY"
-  | "ZERO_CLOUD"
-  | "PRODUCT"
-  | "DEPENDENCY"
-  | "SECURITY"
-  | "COMPLIANCE"
-  | "OTHER";
-
-/*
+/**
  * Rule registry entry (metadata-only).
  *
  * Required fields (per specification):
@@ -38,27 +25,26 @@ export type RuleCategory =
  * - description
  * - documentReference
  * - introducedInPolicyVersion
+ *
+ * @typedef {Object} RuleRegistryEntry
+ * @property {string} ruleCode
+ * @property {string} domain
+ * @property {string} description
+ * @property {string} documentReference
+ * @property {string} introducedInPolicyVersion
  */
-export type RuleRegistryEntry = {
-  readonly ruleCode: string;
-  readonly domain: string;
-  readonly description: string;
-  readonly documentReference: string;
-  readonly introducedInPolicyVersion: string;
-};
 
-/* Backwards-compatible alias for "metadata". */
-export type RuleMetadata = RuleRegistryEntry;
+/**
+ * Backwards-compatible alias for "metadata".
+ *
+ * @typedef {RuleRegistryEntry} RuleMetadata
+ */
 
-/*
+/**
  * Canonical registry map (keyed by ruleCode).
  *
- * Using `Readonly<Record<...>>` ensures:
- * - callers cannot mutate the map through the type system
- * - registry keys are strings
- * - each value must structurally match RuleRegistryEntry
+ * @typedef {Object.<string, RuleRegistryEntry>} RuleRegistryMap
  */
-export type RuleRegistryMap = Readonly<Record<string, RuleRegistryEntry>>;
 
 /*
  * The canonical registry map (keyed by ruleCode).
@@ -156,30 +142,30 @@ const RULE_REGISTRY_INTERNAL = {
     documentReference: "Canonical Governance Rules",
     introducedInPolicyVersion: "1.0.0",
   },
-} as const satisfies RuleRegistryMap;
+};
 
 /*
  * Frozen, readonly registry (metadata-only, deterministic semantics).
  *
  * We freeze at runtime to defend against accidental mutation in JS consumers.
- * The explicit cast preserves the index-signature type for lookup usage.
  */
-export const RULE_REGISTRY: RuleRegistryMap = Object.freeze(
-  RULE_REGISTRY_INTERNAL as RuleRegistryMap,
-);
+/** @type {RuleRegistryMap} */
+export const RULE_REGISTRY = Object.freeze(RULE_REGISTRY_INTERNAL);
 
 /*
  * Deterministic lookup map for rule metadata by code.
  *
  * This separate export preserves prior public surface area and calling patterns.
  */
-export const RULE_REGISTRY_BY_CODE: RuleRegistryMap = RULE_REGISTRY;
+/** @type {RuleRegistryMap} */
+export const RULE_REGISTRY_BY_CODE = RULE_REGISTRY;
 
 /*
  * Deterministic readonly list view of the registry entries.
  *
  * This is a literal list in authoritative order (no dynamic computation).
  */
+/** @type {readonly RuleRegistryEntry[]} */
 const RULE_REGISTRY_LIST = Object.freeze([
   RULE_REGISTRY_INTERNAL["SOVR-001"],
   RULE_REGISTRY_INTERNAL["SOVR-002"],
@@ -193,16 +179,16 @@ const RULE_REGISTRY_LIST = Object.freeze([
   RULE_REGISTRY_INTERNAL["INTF-001"],
   RULE_REGISTRY_INTERNAL["PROD-001"],
   RULE_REGISTRY_INTERNAL["PROD-002"],
-]) as readonly RuleRegistryEntry[];
+]);
 
 /**
  * PUBLIC_INTERFACE
  * Get metadata for a given rule code, if it exists in the registry.
  *
- * @param ruleCode - The rule code to look up.
- * @returns The associated rule metadata if present; otherwise undefined.
+ * @param {string} ruleCode - The rule code to look up.
+ * @returns {RuleMetadata|undefined} The associated rule metadata if present; otherwise undefined.
  */
-export function getRuleMetadata(ruleCode: string): RuleMetadata | undefined {
+export function getRuleMetadata(ruleCode) {
   return RULE_REGISTRY_BY_CODE[ruleCode];
 }
 
@@ -210,8 +196,8 @@ export function getRuleMetadata(ruleCode: string): RuleMetadata | undefined {
  * PUBLIC_INTERFACE
  * List all registered rule metadata entries as a readonly array.
  *
- * @returns A frozen readonly array of all rule metadata entries.
+ * @returns {readonly RuleMetadata[]} A frozen readonly array of all rule metadata entries.
  */
-export function listRuleMetadata(): readonly RuleMetadata[] {
+export function listRuleMetadata() {
   return RULE_REGISTRY_LIST;
 }
