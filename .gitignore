@@ -20,3 +20,6 @@ GIT_*.txt
 
 # Local environment files
 .env
+
+# Runtime logs
+logs/
