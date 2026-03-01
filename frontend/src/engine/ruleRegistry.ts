@@ -3,8 +3,8 @@
  *
  * IMPORTANT:
  * - This file intentionally contains *no* evaluation logic and should not change engine semantics.
- * - It is safe to add and leave unused; it becomes behavior-affecting only if imported and used elsewhere.
- * - The registry is deterministic: stable ordering and static literals only (no Date.now, random, etc.).
+ * - The registry is deterministic: stable literals only (no Date.now, random, etc.).
+ * - No runtime mutation: the registry object is frozen.
  */
 
 /** The severity level associated with a rule (metadata-only). */
@@ -21,66 +21,51 @@ export type RuleCategory =
   | "OTHER";
 
 /**
- * Rule metadata.
+ * Rule registry entry (metadata-only).
  *
- * Note: `code` is expected to match the `rule_code` values returned by the backend
- * (e.g., in evaluation violations). This is metadata only; nothing here is used
- * to decide outcomes.
+ * Required fields (per specification):
+ * - ruleCode
+ * - domain
+ * - description
+ * - documentReference
+ * - introducedInPolicyVersion
  */
-export type RuleMetadata = Readonly<{
-  /** Stable identifier for the rule, typically a backend-emitted rule_code. */
-  code: string;
-
-  /** Human-friendly name/title. */
-  title: string;
-
-  /** Short description of what the rule checks. */
-  description?: string;
-
-  /** Default/severity classification (metadata-only). */
-  severity?: RuleSeverity;
-
-  /** Category grouping for UX/docs (metadata-only). */
-  category?: RuleCategory;
-
-  /** Optional tags/keywords for searching/grouping. */
-  tags?: readonly string[];
-
-  /**
-   * Optional: stable ordering key for deterministic presentation when needed.
-   * If omitted, array order is the source of truth.
-   */
-  order?: number;
-
-  /** Optional link to external documentation. */
-  docsUrl?: string;
+export type RuleRegistryEntry = Readonly<{
+  ruleCode: string;
+  domain: string;
+  description: string;
+  documentReference: string;
+  introducedInPolicyVersion: string;
 }>;
 
 /**
- * The canonical registry list.
+ * Backwards-compatible alias for "metadata".
+ * (This file is metadata-only; naming here must not affect evaluation semantics.)
+ */
+export type RuleMetadata = RuleRegistryEntry;
+
+/**
+ * The canonical registry map (keyed by ruleCode).
  *
  * Determinism rules:
- * - Keep as a literal array.
- * - Keep order stable (append new rules to the end unless a deliberate re-order is required).
+ * - Keep as a literal object.
+ * - Keep ordering stable (append new keys; do not reorder without intent).
  * - Do not compute fields dynamically.
  */
-export const RULE_REGISTRY: readonly RuleMetadata[] = Object.freeze(
-  [
-    // NOTE: The authoritative rule list/metadata should be populated here.
-    // This scaffold is intentionally empty to avoid guessing rule codes and semantics.
-  ] as const
-);
+export const RULE_REGISTRY = (Object.freeze({
+  // NOTE: The authoritative rule list/metadata should be populated here.
+  // This scaffold is intentionally empty to avoid guessing rule codes and semantics.
+} as const) satisfies Readonly<Record<string, RuleRegistryEntry>>);
 
 /**
  * Deterministic lookup map for rule metadata by code.
- * Built from RULE_REGISTRY (which is itself deterministic).
+ * Since RULE_REGISTRY is already keyed by ruleCode, this is an alias.
  */
-export const RULE_REGISTRY_BY_CODE: Readonly<Record<string, RuleMetadata>> = Object.freeze(
-  RULE_REGISTRY.reduce<Record<string, RuleMetadata>>((acc, rule) => {
-    // In case of accidental duplicates, the first occurrence wins to keep behavior stable.
-    if (acc[rule.code] === undefined) acc[rule.code] = rule;
-    return acc;
-  }, {})
+export const RULE_REGISTRY_BY_CODE: Readonly<Record<string, RuleRegistryEntry>> = RULE_REGISTRY;
+
+/** Deterministic readonly list view of the registry entries. */
+const RULE_REGISTRY_LIST: readonly RuleRegistryEntry[] = Object.freeze(
+  Object.values(RULE_REGISTRY) as RuleRegistryEntry[]
 );
 
 // PUBLIC_INTERFACE
@@ -98,5 +83,5 @@ export function listRuleMetadata(): readonly RuleMetadata[] {
    * Return the full rule registry list (readonly).
    * Callers must not mutate returned data.
    */
-  return RULE_REGISTRY;
+  return RULE_REGISTRY_LIST;
 }
