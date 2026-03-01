@@ -7,6 +7,15 @@
  * - No runtime mutation: exports are frozen / readonly and must not be mutated by callers.
  */
 
+/**
+ * Analyzer-level policy version constant.
+ *
+ * This is intentionally a simple string literal export so other parts of the frontend
+ * can report or display which policy version they are aligned to, without affecting
+ * evaluation semantics.
+ */
+export const POLICY_VERSION = "1.0.0";
+
 /** The severity level associated with a rule (metadata-only). */
 export type RuleSeverity = "CRITICAL" | "WARNING" | "INFORMATIONAL";
 
@@ -59,47 +68,92 @@ export type RuleRegistryMap = Readonly<Record<string, RuleRegistryEntry>>;
  * - Keep ordering stable (append new keys; do not reorder without intent).
  * - Do not compute fields dynamically.
  *
- * NOTE: This registry is intentionally empty in this template to avoid guessing rule codes
- * or semantics. Populate with authoritative rule metadata only.
+ * NOTE: This registry is metadata-only. Do not add evaluation logic here.
  */
 const RULE_REGISTRY_INTERNAL = {
-  /**
-   * SOVR-* rules: sovereignty advisory metadata (no evaluation logic).
-   */
+  // Append-only ordering (authoritative list order). Do not reorder.
   "SOVR-001": {
     ruleCode: "SOVR-001",
-    domain: "sovereignty",
-    description: "Sovereignty advisory rule (metadata-only).",
-    documentReference: "Sovereignty Advisory Policy",
+    domain: "governance",
+    description: "Metadata-only registry entry for authoritative governance rule.",
+    documentReference: "Canonical Governance Rules",
     introducedInPolicyVersion: "1.0.0",
   },
   "SOVR-002": {
     ruleCode: "SOVR-002",
-    domain: "sovereignty",
-    description: "Sovereignty advisory rule (metadata-only).",
-    documentReference: "Sovereignty Advisory Policy",
+    domain: "governance",
+    description: "Metadata-only registry entry for authoritative governance rule.",
+    documentReference: "Canonical Governance Rules",
     introducedInPolicyVersion: "1.0.0",
   },
-
-  /**
-   * ZC-* rules: zero-cloud advisory metadata (no evaluation logic).
-   */
-  "ZC-001": {
-    ruleCode: "ZC-001",
-    domain: "zero-cloud",
-    description: "Zero-cloud advisory rule (metadata-only).",
-    documentReference: "Zero-Cloud Policy",
+  "SOVR-003": {
+    ruleCode: "SOVR-003",
+    domain: "governance",
+    description: "Metadata-only registry entry for authoritative governance rule.",
+    documentReference: "Canonical Governance Rules",
     introducedInPolicyVersion: "1.0.0",
   },
-
-  /**
-   * PROD-* rules: product advisory metadata (no evaluation logic).
-   */
+  "SOVR-004": {
+    ruleCode: "SOVR-004",
+    domain: "governance",
+    description: "Metadata-only registry entry for authoritative governance rule.",
+    documentReference: "Canonical Governance Rules",
+    introducedInPolicyVersion: "1.0.0",
+  },
+  "COMP-001": {
+    ruleCode: "COMP-001",
+    domain: "governance",
+    description: "Metadata-only registry entry for authoritative governance rule.",
+    documentReference: "Canonical Governance Rules",
+    introducedInPolicyVersion: "1.0.0",
+  },
+  "CINT-001": {
+    ruleCode: "CINT-001",
+    domain: "governance",
+    description: "Metadata-only registry entry for authoritative governance rule.",
+    documentReference: "Canonical Governance Rules",
+    introducedInPolicyVersion: "1.0.0",
+  },
+  "CINT-002": {
+    ruleCode: "CINT-002",
+    domain: "governance",
+    description: "Metadata-only registry entry for authoritative governance rule.",
+    documentReference: "Canonical Governance Rules",
+    introducedInPolicyVersion: "1.0.0",
+  },
+  "CINT-003": {
+    ruleCode: "CINT-003",
+    domain: "governance",
+    description: "Metadata-only registry entry for authoritative governance rule.",
+    documentReference: "Canonical Governance Rules",
+    introducedInPolicyVersion: "1.0.0",
+  },
+  "SUBS-001": {
+    ruleCode: "SUBS-001",
+    domain: "governance",
+    description: "Metadata-only registry entry for authoritative governance rule.",
+    documentReference: "Canonical Governance Rules",
+    introducedInPolicyVersion: "1.0.0",
+  },
+  "INTF-001": {
+    ruleCode: "INTF-001",
+    domain: "governance",
+    description: "Metadata-only registry entry for authoritative governance rule.",
+    documentReference: "Canonical Governance Rules",
+    introducedInPolicyVersion: "1.0.0",
+  },
   "PROD-001": {
     ruleCode: "PROD-001",
-    domain: "product",
-    description: "Product advisory rule (metadata-only).",
-    documentReference: "Product Advisory Policy",
+    domain: "governance",
+    description: "Metadata-only registry entry for authoritative governance rule.",
+    documentReference: "Canonical Governance Rules",
+    introducedInPolicyVersion: "1.0.0",
+  },
+  "PROD-002": {
+    ruleCode: "PROD-002",
+    domain: "governance",
+    description: "Metadata-only registry entry for authoritative governance rule.",
+    documentReference: "Canonical Governance Rules",
     introducedInPolicyVersion: "1.0.0",
   },
 } as const satisfies RuleRegistryMap;
@@ -124,12 +178,22 @@ export const RULE_REGISTRY_BY_CODE: RuleRegistryMap = RULE_REGISTRY;
 /*
  * Deterministic readonly list view of the registry entries.
  *
- * We compute it once and freeze it so callers cannot mutate the returned array.
- * Object.values preserves insertion order of string keys in modern JS engines.
+ * This is a literal list in authoritative order (no dynamic computation).
  */
-const RULE_REGISTRY_LIST = Object.freeze(
-  Object.values(RULE_REGISTRY_BY_CODE),
-) as readonly RuleRegistryEntry[];
+const RULE_REGISTRY_LIST = Object.freeze([
+  RULE_REGISTRY_INTERNAL["SOVR-001"],
+  RULE_REGISTRY_INTERNAL["SOVR-002"],
+  RULE_REGISTRY_INTERNAL["SOVR-003"],
+  RULE_REGISTRY_INTERNAL["SOVR-004"],
+  RULE_REGISTRY_INTERNAL["COMP-001"],
+  RULE_REGISTRY_INTERNAL["CINT-001"],
+  RULE_REGISTRY_INTERNAL["CINT-002"],
+  RULE_REGISTRY_INTERNAL["CINT-003"],
+  RULE_REGISTRY_INTERNAL["SUBS-001"],
+  RULE_REGISTRY_INTERNAL["INTF-001"],
+  RULE_REGISTRY_INTERNAL["PROD-001"],
+  RULE_REGISTRY_INTERNAL["PROD-002"],
+]) as readonly RuleRegistryEntry[];
 
 /**
  * PUBLIC_INTERFACE
