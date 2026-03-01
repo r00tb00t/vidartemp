@@ -51,21 +51,33 @@ export type RuleMetadata = RuleRegistryEntry;
  * - Keep as a literal object.
  * - Keep ordering stable (append new keys; do not reorder without intent).
  * - Do not compute fields dynamically.
+ *
+ * NOTE:
+ * We intentionally avoid using newer TS-only operators (e.g. `satisfies`) to keep
+ * compatibility with stricter/older TypeScript toolchains while preserving runtime semantics.
  */
-export const RULE_REGISTRY = (Object.freeze({
-  // NOTE: The authoritative rule list/metadata should be populated here.
-  // This scaffold is intentionally empty to avoid guessing rule codes and semantics.
-} as const) satisfies Readonly<Record<string, RuleRegistryEntry>>);
+export const RULE_REGISTRY: Readonly<Record<string, RuleRegistryEntry>> = Object.freeze(
+  {
+    // NOTE: The authoritative rule list/metadata should be populated here.
+    // This scaffold is intentionally empty to avoid guessing rule codes and semantics.
+  } as Record<string, RuleRegistryEntry>
+);
 
 /**
  * Deterministic lookup map for rule metadata by code.
  * Since RULE_REGISTRY is already keyed by ruleCode, this is an alias.
  */
-export const RULE_REGISTRY_BY_CODE: Readonly<Record<string, RuleRegistryEntry>> = RULE_REGISTRY;
+export const RULE_REGISTRY_BY_CODE: Readonly<Record<string, RuleRegistryEntry>> =
+  RULE_REGISTRY;
 
-/** Deterministic readonly list view of the registry entries. */
+/**
+ * Deterministic readonly list view of the registry entries.
+ *
+ * We freeze the resulting array to prevent accidental mutation by callers.
+ * `Object.values` typing can be broad under strict TS, so we cast explicitly.
+ */
 const RULE_REGISTRY_LIST: readonly RuleRegistryEntry[] = Object.freeze(
-  Object.values(RULE_REGISTRY) as RuleRegistryEntry[]
+  Object.values(RULE_REGISTRY_BY_CODE) as RuleRegistryEntry[]
 );
 
 // PUBLIC_INTERFACE
