@@ -7,6 +7,15 @@
  * - No runtime mutation: exports are frozen / readonly and must not be mutated by callers.
  */
 
+/**
+ * Analyzer-level policy version constant.
+ *
+ * This is intentionally a simple string literal export so other parts of the frontend
+ * can report or display which policy version they are aligned to, without affecting
+ * evaluation semantics.
+ */
+export const POLICY_VERSION = "1.0.0";
+
 /** The severity level associated with a rule (metadata-only). */
 export type RuleSeverity = "CRITICAL" | "WARNING" | "INFORMATIONAL";
 
@@ -59,8 +68,7 @@ export type RuleRegistryMap = Readonly<Record<string, RuleRegistryEntry>>;
  * - Keep ordering stable (append new keys; do not reorder without intent).
  * - Do not compute fields dynamically.
  *
- * NOTE: This registry is intentionally empty in this template to avoid guessing rule codes
- * or semantics. Populate with authoritative rule metadata only.
+ * NOTE: This registry is metadata-only. Do not add evaluation logic here.
  */
 const RULE_REGISTRY_INTERNAL = {
   /**
@@ -97,6 +105,18 @@ const RULE_REGISTRY_INTERNAL = {
    */
   "PROD-001": {
     ruleCode: "PROD-001",
+    domain: "product",
+    description: "Product advisory rule (metadata-only).",
+    documentReference: "Product Advisory Policy",
+    introducedInPolicyVersion: "1.0.0",
+  },
+
+  /**
+   * Append-only authoritative rule codes (metadata-only).
+   * Keep deterministic ordering by appending new rules at the end.
+   */
+  "PROD-002": {
+    ruleCode: "PROD-002",
     domain: "product",
     description: "Product advisory rule (metadata-only).",
     documentReference: "Product Advisory Policy",
