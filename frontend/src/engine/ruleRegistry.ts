@@ -2,9 +2,9 @@
  * Deterministic, metadata-only rule registry.
  *
  * IMPORTANT:
- * - This file intentionally contains *no* evaluation logic and should not change engine semantics.
- * - The registry is deterministic: stable literals only (no Date.now, random, etc.).
- * - No runtime mutation: the registry object is frozen.
+ * - This file intentionally contains *no* evaluation logic and must not change engine semantics.
+ * - Deterministic only: stable literals (no Date.now, Math.random, etc.).
+ * - No runtime mutation: the registry object is frozen after declaration.
  */
 
 /** The severity level associated with a rule (metadata-only). */
@@ -53,19 +53,22 @@ export type RuleMetadata = RuleRegistryEntry;
  * - Do not compute fields dynamically.
  *
  * NOTE:
- * We intentionally avoid using newer TS-only operators (e.g. `satisfies`) to keep
- * compatibility with stricter/older TypeScript toolchains while preserving runtime semantics.
+ * The declaration below MUST remain in the exact form:
+ * `} as const satisfies Readonly<Record<string, RuleRegistryEntry>>;`
  */
-export const RULE_REGISTRY: Readonly<Record<string, RuleRegistryEntry>> = Object.freeze(
-  {
-    // NOTE: The authoritative rule list/metadata should be populated here.
-    // This scaffold is intentionally empty to avoid guessing rule codes and semantics.
-  } as Record<string, RuleRegistryEntry>
-);
+export const RULE_REGISTRY = {
+  // NOTE: The authoritative rule list/metadata should be populated here.
+  // This registry is intentionally empty to avoid guessing rule codes or semantics.
+} as const satisfies Readonly<Record<string, RuleRegistryEntry>>;
+
+// Freeze to prevent runtime mutation (metadata-only, deterministic semantics).
+Object.freeze(RULE_REGISTRY);
 
 /**
  * Deterministic lookup map for rule metadata by code.
- * Since RULE_REGISTRY is already keyed by ruleCode, this is an alias.
+ *
+ * We intentionally widen the type to a string-indexed map for safe indexing via
+ * `map[ruleCode]` under strict TypeScript.
  */
 export const RULE_REGISTRY_BY_CODE: Readonly<Record<string, RuleRegistryEntry>> =
   RULE_REGISTRY;
